@@ -1,8 +1,8 @@
 # Corte Inteligente (Smart Cut) - Adobe Premiere Extension
 
 <div align="center">
-  <a href="https://github.com/Mattys03/CorteInteligente/archive/refs/heads/master.zip">
-    <img src="https://img.shields.io/badge/📥_Download_Latest_Version-FF0000?style=for-the-badge&logo=adobe" alt="Download ZIP" />
+  <a href="https://github.com/Mattys03/CorteInteligente/releases/latest">
+    <img src="https://img.shields.io/badge/📦_Download_Release-FF0000?style=for-the-badge&logo=adobe" alt="Download Release" />
   </a>
 </div>
 
