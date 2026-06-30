@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Corte Inteligente</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', -apple-system, sans-serif;
+            background: #1e1e1e; color: #e0e0e0;
+            font-size: 12px; padding: 12px;
+            user-select: none; overflow: hidden;
+        }
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        .header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding-bottom: 8px; margin-bottom: 10px; border-bottom: 1px solid #333;
+        }
+        .header h1 { font-size: 13px; font-weight: 600; color: #fff; }
+        .gear-btn {
+            background: none; border: none; color: #888; font-size: 14px;
+            cursor: pointer; padding: 2px 5px; border-radius: 4px;
+        }
+        .gear-btn:hover { background: #333; color: #fff; }
+
+        .row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 12px; background: #2a2a2a; border-radius: 6px; margin-bottom: 7px;
+        }
+        .row-label { font-size: 11px; color: #ccc; }
+        .toggle { position: relative; width: 36px; height: 18px; cursor: pointer; }
+        .toggle input { display: none; }
+        .toggle-track {
+            position: absolute; inset: 0; background: #444;
+            border-radius: 9px; transition: background 0.2s;
+        }
+        .toggle input:checked + .toggle-track { background: #0078d7; }
+        .toggle-knob {
+            position: absolute; top: 2px; left: 2px; width: 14px; height: 14px;
+            background: #fff; border-radius: 50%; transition: transform 0.2s; pointer-events: none;
+        }
+        .toggle input:checked ~ .toggle-knob { transform: translateX(18px); }
+
+        .check-row {
+            display: flex; align-items: center; gap: 7px;
+            padding: 8px 12px; background: #2a2a2a; border-radius: 6px;
+            margin-bottom: 7px; cursor: pointer;
+        }
+        .check-row input { accent-color: #0078d7; width: 13px; height: 13px; }
+        .check-row span { font-size: 11px; color: #ccc; }
+
+        .shortcut-box {
+            padding: 8px 12px; background: #2a2a2a; border-radius: 6px; margin-bottom: 7px;
+        }
+        .shortcut-box label { display: block; font-size: 10px; color: #777; margin-bottom: 4px; }
+        .shortcut-btn {
+            width: 100%; padding: 6px; background: #333; border: 1px solid #555;
+            color: #fff; border-radius: 4px; font-size: 11px; font-weight: 600;
+            cursor: pointer; text-align: center;
+        }
+        .shortcut-btn:hover { border-color: #0078d7; }
+        .shortcut-btn.recording { background: #5c1a1a; border-color: #ff4444; animation: pulse 1s infinite; }
+        @keyframes pulse { 50% { opacity: 0.7; } }
+        .hint { font-size: 9px; color: #555; text-align: center; margin-top: 3px; }
+
+        .btn-open {
+            width: 100%; padding: 11px; border: none; border-radius: 6px;
+            font-size: 13px; font-weight: 700; cursor: pointer;
+            background: #0078d7; color: #fff; margin-top: 5px; transition: all 0.15s;
+        }
+        .btn-open:hover { background: #005fa3; }
+
+        .input-group { margin-bottom: 10px; }
+        .input-group label { display: block; font-size: 10px; color: #777; margin-bottom: 4px; }
+        .frame-input {
+            width: 100%; padding: 10px; background: #111; border: 1px solid #444;
+            color: #fff; font-size: 20px; font-weight: 700; text-align: center;
+            border-radius: 6px; outline: none; transition: border-color 0.15s;
+        }
+        .frame-input:focus { border-color: #0078d7; }
+        .frame-input::placeholder { color: #555; font-weight: 400; font-size: 14px; }
+
+        .option-row { display: flex; gap: 6px; margin-bottom: 8px; }
+        .option-btn {
+            flex: 1; padding: 8px 4px; background: #2a2a2a; border: 1px solid #444;
+            color: #aaa; border-radius: 6px; font-size: 10px; font-weight: 600;
+            text-align: center; cursor: pointer; transition: all 0.15s;
+        }
+        .option-btn:hover { border-color: #666; color: #fff; }
+        .option-btn.selected { background: #0078d7; border-color: #0078d7; color: #fff; }
+
+        .btn-apply {
+            width: 100%; padding: 10px; border: none; border-radius: 6px;
+            font-size: 12px; font-weight: 700; cursor: pointer;
+            background: #0078d7; color: #fff; margin-top: 6px; transition: all 0.15s;
+        }
+        .btn-apply:hover { background: #005fa3; }
+        .btn-apply.success { background: #28a745; }
+        .btn-apply.error { background: #dc3545; }
+
+        .status {
+            margin-top: 6px; padding: 5px; font-size: 10px;
+            text-align: center; color: #666; min-height: 20px;
+        }
+        .status.ok { color: #28a745; }
+        .status.err { color: #ff4444; }
+    </style>
+</head>
+<body>
+
+    <!-- CONFIG SCREEN -->
+    <div id="configScreen" class="screen active">
+        <div class="header"><h1>⚙️ Corte Inteligente</h1></div>
+
+        <div class="row">
+            <span class="row-label">Ativar extensão</span>
+            <label class="toggle">
+                <input type="checkbox" id="toggleAtivo">
+                <div class="toggle-track"></div>
+                <div class="toggle-knob"></div>
+            </label>
+        </div>
+
+        <label class="check-row">
+            <input type="checkbox" id="autoCloseCheck">
+            <span>Voltar pra config após aplicar</span>
+        </label>
+
+        <div class="shortcut-box">
+            <label>Atalho para abrir popup</label>
+            <button class="shortcut-btn" id="btnShortcut">Shift + Q</button>
+            <div class="hint">Clique e pressione a combinação</div>
+        </div>
+
+        <button class="btn-open" id="btnOpen">✂️ Abrir Corte Inteligente</button>
+        <div class="status" id="configStatus"></div>
+    </div>
+
+    <!-- ACTION SCREEN -->
+    <div id="actionScreen" class="screen">
+        <div class="header">
+            <h1>✂️ Corte Inteligente</h1>
+            <button class="gear-btn" id="btnBackConfig" title="Voltar">⚙️</button>
+        </div>
+
+        <div class="input-group">
+            <label>Quantidade de frames</label>
+            <input type="number" class="frame-input" id="frameInput" placeholder="15" min="1">
+        </div>
+
+        <div class="option-row">
+            <button class="option-btn selected" id="btnEnd">Cortar Final ➡️</button>
+            <button class="option-btn" id="btnStart">⬅️ Cortar Início</button>
+        </div>
+
+        <label class="check-row">
+            <input type="checkbox" id="rippleCheck" checked>
+            <span>Juntar camadas (fechar gaps)</span>
+        </label>
+
+        <label class="check-row">
+            <input type="checkbox" id="compCheck">
+            <span>Compensar posição (slip edit)</span>
+        </label>
+
+        <button class="btn-apply" id="btnApply">Aplicar ↵</button>
+        <div class="status" id="actionStatus">Selecione clips → digite frames → Enter</div>
+    </div>
+
+    <script src="./CSInterface.js"></script>
+    <script>
+    (function() {
+        var cs = new CSInterface();
+
+        var configScreen  = document.getElementById("configScreen");
+        var actionScreen  = document.getElementById("actionScreen");
+        var toggleAtivo   = document.getElementById("toggleAtivo");
+        var autoCloseCheck = document.getElementById("autoCloseCheck");
+        var btnShortcut   = document.getElementById("btnShortcut");
+        var btnOpen       = document.getElementById("btnOpen");
+        var configStatus  = document.getElementById("configStatus");
+        var btnBackConfig = document.getElementById("btnBackConfig");
+        var frameInput    = document.getElementById("frameInput");
+        var btnEnd        = document.getElementById("btnEnd");
+        var btnStart      = document.getElementById("btnStart");
+        var rippleCheck   = document.getElementById("rippleCheck");
+        var compCheck     = document.getElementById("compCheck");
+        var btnApply      = document.getElementById("btnApply");
+        var actionStatus  = document.getElementById("actionStatus");
+
+        var shortcut = JSON.parse(localStorage.getItem("ci_shortcut") || "null") || {
+            keyCode: 81, shiftKey: true, ctrlKey: false, altKey: false
+        };
+        var isActive = localStorage.getItem("ci_active") !== "false";
+        var autoClose = localStorage.getItem("ci_autoclose") === "true";
+        var trimSide = localStorage.getItem("ci_side") || "end";
+        var isRecording = false;
+
+        toggleAtivo.checked = isActive;
+        autoCloseCheck.checked = autoClose;
+        if (localStorage.getItem("ci_frames")) frameInput.value = localStorage.getItem("ci_frames");
+        rippleCheck.checked = localStorage.getItem("ci_ripple") !== "false";
+        compCheck.checked = localStorage.getItem("ci_comp") === "true";
+        if (trimSide === "start") { btnStart.classList.add("selected"); btnEnd.classList.remove("selected"); }
+        updateShortcutLabel();
+        registerShortcut();
+
+        function showConfig() {
+            configScreen.classList.add("active");
+            actionScreen.classList.remove("active");
+        }
+
+        function showAction() {
+            configScreen.classList.remove("active");
+            actionScreen.classList.add("active");
+            setTimeout(function() { frameInput.focus(); frameInput.select(); }, 80);
+        }
+
+        function registerShortcut() {
+            try {
+                cs.registerKeyEventsInterest(JSON.stringify([{
+                    keyCode: shortcut.keyCode, ctrlKey: shortcut.ctrlKey,
+                    altKey: shortcut.altKey, shiftKey: shortcut.shiftKey, metaKey: false
+                }]));
+            } catch(e) {}
+        }
+
+        function getLabel() {
+            var p = [];
+            if (shortcut.ctrlKey) p.push("Ctrl");
+            if (shortcut.altKey) p.push("Alt");
+            if (shortcut.shiftKey) p.push("Shift");
+            p.push(String.fromCharCode(shortcut.keyCode));
+            return p.join(" + ");
+        }
+
+        function updateShortcutLabel() { btnShortcut.textContent = getLabel(); }
+
+        function saveAll() {
+            localStorage.setItem("ci_active", isActive);
+            localStorage.setItem("ci_autoclose", autoClose);
+            localStorage.setItem("ci_frames", frameInput.value);
+            localStorage.setItem("ci_side", trimSide);
+            localStorage.setItem("ci_ripple", rippleCheck.checked);
+            localStorage.setItem("ci_comp", compCheck.checked);
+        }
+
+        toggleAtivo.addEventListener("change", function() {
+            isActive = toggleAtivo.checked;
+            saveAll();
+        });
+
+        autoCloseCheck.addEventListener("change", function() {
+            autoClose = autoCloseCheck.checked;
+            saveAll();
+        });
+
+        btnShortcut.addEventListener("click", function() {
+            isRecording = true;
+            btnShortcut.textContent = "Pressione...";
+            btnShortcut.classList.add("recording");
+        });
+
+        btnOpen.addEventListener("click", showAction);
+        btnBackConfig.addEventListener("click", showConfig);
+
+        btnEnd.addEventListener("click", function() {
+            trimSide = "end"; btnEnd.classList.add("selected"); btnStart.classList.remove("selected"); saveAll();
+        });
+        btnStart.addEventListener("click", function() {
+            trimSide = "start"; btnStart.classList.add("selected"); btnEnd.classList.remove("selected"); saveAll();
+        });
+        rippleCheck.addEventListener("change", saveAll);
+        compCheck.addEventListener("change", saveAll);
+        frameInput.addEventListener("input", saveAll);
+
+        btnApply.addEventListener("click", executeTrim);
+
+        window.addEventListener("keydown", function(e) {
+            if (isRecording) {
+                e.preventDefault();
+                if (e.keyCode === 16 || e.keyCode === 17 || e.keyCode === 18) return;
+                shortcut = { keyCode: e.keyCode, ctrlKey: e.ctrlKey, altKey: e.altKey, shiftKey: e.shiftKey };
+                localStorage.setItem("ci_shortcut", JSON.stringify(shortcut));
+                isRecording = false;
+                btnShortcut.classList.remove("recording");
+                updateShortcutLabel();
+                registerShortcut();
+                return;
+            }
+
+            if (e.keyCode === shortcut.keyCode &&
+                e.ctrlKey === shortcut.ctrlKey &&
+                e.altKey === shortcut.altKey &&
+                e.shiftKey === shortcut.shiftKey) {
+                e.preventDefault();
+                showAction();
+                return;
+            }
+
+            if (e.keyCode === 13 && actionScreen.classList.contains("active")) {
+                e.preventDefault();
+                executeTrim();
+            }
+        }, true);
+
+        var isRunning = false;
+
+        function resetUI() {
+            isRunning = false;
+            btnApply.disabled = false;
+            btnApply.textContent = "Aplicar ↵";
+        }
+
+        function executeTrim() {
+            if (isRunning) return;
+
+            var frames = frameInput.value;
+            if (!frames || parseInt(frames, 10) <= 0) {
+                actionStatus.textContent = "❌ Digite um número válido";
+                actionStatus.className = "status err";
+                frameInput.style.borderColor = "#ff4444";
+                setTimeout(function() { frameInput.style.borderColor = ""; }, 500);
+                return;
+            }
+
+            var isStart = (trimSide === "start");
+            var ripple = rippleCheck.checked;
+            var comp = compCheck.checked;
+
+            isRunning = true;
+            btnApply.disabled = true;
+            btnApply.textContent = "Cortando...";
+            saveAll();
+
+            // Safety timeout: unlock UI after 5 seconds no matter what
+            var safetyTimer = setTimeout(function() {
+                resetUI();
+                actionStatus.textContent = "⚠️ Timeout - tente novamente";
+                actionStatus.className = "status err";
+                setTimeout(function() { frameInput.focus(); frameInput.select(); }, 200);
+            }, 5000);
+
+            var script = 'processTrim("' + frames + '", ' + isStart + ', ' + ripple + ', ' + comp + ')';
+
+            try {
+                cs.evalScript(script, function(result) {
+                    clearTimeout(safetyTimer);
+                    resetUI();
+
+                    try {
+                        var r = JSON.parse(result);
+                        if (r.ok) {
+                            actionStatus.textContent = "✅ " + r.msg;
+                            actionStatus.className = "status ok";
+                            btnApply.classList.add("success");
+                            setTimeout(function() { btnApply.classList.remove("success"); }, 1200);
+
+                            if (autoClose) {
+                                setTimeout(showConfig, 800);
+                            }
+                        } else {
+                            actionStatus.textContent = "❌ " + r.msg;
+                            actionStatus.className = "status err";
+                            btnApply.classList.add("error");
+                            setTimeout(function() { btnApply.classList.remove("error"); }, 1200);
+                        }
+                    } catch(e) {
+                        actionStatus.textContent = "⚠️ Resposta inesperada do script";
+                        actionStatus.className = "status err";
+                    }
+
+                    setTimeout(function() { frameInput.focus(); frameInput.select(); }, 200);
+                });
+            } catch(evalErr) {
+                clearTimeout(safetyTimer);
+                resetUI();
+                actionStatus.textContent = "⚠️ Erro de comunicação com Premiere";
+                actionStatus.className = "status err";
+            }
+        }
+    })();
+    </script>
+</body>
+</html>
