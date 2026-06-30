@@ -1,4 +1,4 @@
-# Corte Inteligente (Smart Cut) - Adobe Premiere Extension
+# Corte Inteligente (Smart Cut) - Extensão para Adobe Premiere
 
 <div align="center">
   <a href="https://github.com/Mattys03/CorteInteligente/releases/latest">
@@ -6,41 +6,34 @@
   </a>
 </div>
 
-![Platform](https://img.shields.io/badge/Platform-Adobe%20Premiere%20Pro-blue)
-![Tech](https://img.shields.io/badge/Tech-CEP%20%7C%20ExtendScript-green)
-![License](https://img.shields.io/badge/License-MIT-purple)
+![Platform](https://img.shields.io/badge/Plataforma-Adobe%20Premiere%20Pro-blue)
+![Tech](https://img.shields.io/badge/Tecnologia-CEP%20%7C%20ExtendScript-green)
+![License](https://img.shields.io/badge/Licen%C3%A7a-MIT-purple)
 
-**Corte Inteligente** is an Adobe CEP (Common Extensibility Platform) Extension designed for Adobe Premiere Pro. It drastically speeds up the video editing workflow by automating tedious cutting and timeline manipulation tasks. 
+**Corte Inteligente** é uma Extensão Nativa baseada no CEP (*Common Extensibility Platform*) para o Adobe Premiere Pro. Ela tem como objetivo acelerar drasticamente o fluxo de edição de vídeo, automatizando cortes e a manipulação dinâmica da timeline (linha do tempo).
 
-By bridging modern Web Technologies (HTML/JS/CSS) with Adobe's internal ExtendScript (JSX), this extension provides a seamless panel directly inside Premiere Pro.
+A ferramenta utiliza o ecossistema Web (HTML, JavaScript, CSS) renderizado num navegador Chromium embarcado, e faz a ponte diretamente com a API do Premiere através de *ExtendScript* (JSX).
 
-## 🚀 Features
+## 🚀 Funcionalidades
 
-- **Automated Timeline Operations:** Programmatically trigger cuts, deletes, and ripples.
-- **Native Premiere Integration:** Operates directly inside the Premiere Pro UI as a dockable panel.
-- **ExtendScript (JSX) Backend:** Interacts directly with the Premiere Pro DOM to manipulate sequences, tracks, and clips.
-- **Modern UI:** Built with HTML/JS, running on the embedded Chromium framework provided by Adobe CEP.
+- **Operações Dinâmicas de Timeline:** Acionamento programático de cortes e exclusões com ondulação (*ripple delete*).
+- **Integração Nativa de Painel:** Funciona perfeitamente ancorado dentro da interface de usuário padrão do Premiere Pro.
+- **Ponte ExtendScript (JSX):** Interação em baixo nível com o DOM do Premiere Pro, permitindo modificar *Sequences*, *Tracks* (Faixas) e *Clips* sem atrasos.
 
-## 🛠️ Architecture
+## 🛠️ Arquitetura
 
-- **`CSXS/manifest.xml`**: Extension configuration, defining panel size, Adobe host versions (Premiere Pro), and entry points.
-- **`index.html` & `CSInterface.js`**: The frontend UI of the extension and the Adobe integration bridge.
-- **`jsx/`**: ExtendScript backend files that execute native Premiere API commands.
+- **`CSXS/manifest.xml`**: O "coração" da extensão, definindo o tamanho da janela, versões compatíveis com o Adobe host e pontos de entrada.
+- **`index.html` & `CSInterface.js`**: O painel *Frontend* e a ponte de comunicação oficial disponibilizada pela Adobe.
+- **`jsx/`**: Diretório contendo a lógica *Backend* escrita em ExtendScript para comandar as APIs do software.
 
-## 📦 Installation
+## 📦 Instalação (Para Desenvolvedores / Debug)
 
-### For Users (ZXP)
-*(Assuming you package the extension as a `.zxp` file)*
-1. Download a ZXP Installer (like Anastasiy's Extension Manager).
-2. Install the `CorteInteligente.zxp` file.
-3. In Premiere Pro, go to **Window -> Extensions -> Corte Inteligente**.
+1. Faça o clone ou download deste repositório para a pasta oficial de extensões CEP:
+   - Windows: `C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\`
+2. Habilite o `PlayerDebugMode` no Registro do Windows para que o Premiere aceite painéis não assinados digitalmente.
+   - O projeto já acompanha o arquivo `INSTALAR.bat` que cria a ponte de diretórios (symlink) e insere as chaves no registro automaticamente.
+3. Reinicie o Adobe Premiere Pro e acesse o menu **Janela -> Extensões -> Corte Inteligente**.
 
-### For Developers (Debug Mode)
-1. Clone the repository into your Adobe CEP extensions folder (usually `C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\` on Windows).
-2. Enable `PlayerDebugMode` in the Windows Registry to allow loading unsigned extensions.
-   - You can run the provided `INSTALAR.bat` to automatically set up the registry and create a symlink to the extension folder.
-3. Restart Premiere Pro.
+## 📝 Licença
 
-## 📝 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
+Distribuído sob a Licença MIT.
