@@ -9,6 +9,7 @@
 ![Platform](https://img.shields.io/badge/Plataforma-Adobe%20Premiere%20Pro-blue)
 ![Tech](https://img.shields.io/badge/Tecnologia-CEP%20%7C%20ExtendScript-green)
 ![License](https://img.shields.io/badge/Licen%C3%A7a-MIT-purple)
+[![JS Check CI](https://github.com/Mattys03/CorteInteligente/actions/workflows/js-check.yml/badge.svg)](https://github.com/Mattys03/CorteInteligente/actions/workflows/js-check.yml)
 
 **Corte Inteligente** é uma Extensão Nativa baseada no CEP (*Common Extensibility Platform*) para o Adobe Premiere Pro. Ela tem como objetivo acelerar drasticamente o fluxo de edição de vídeo, automatizando cortes e a manipulação dinâmica da timeline (linha do tempo).
 
